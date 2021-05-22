@@ -3,17 +3,18 @@
 """
 Stack data structure (DS) module.
 
-This module contains only (linked) list implementation.
-In fact, the Python list DS can be perfectly used as stack.
+Python list DS can be used as a stack.
 
-The array-based implementation is possible, but not implemented here.
+See Also
+--------
+https://docs.python.org/3/tutorial/datastructures.html
 """
 
 
 __author__ = "Stanislav D. Kudriavtsev"
 
 
-from typing import Any, List
+from typing import Any, List, Sequence
 
 
 # Complexity: worst case
@@ -21,20 +22,23 @@ from typing import Any, List
 # Operation : array-based : list-based
 
 # __bool__ : O(1) : O(1)
-# __len__  : O(1) : O(n), with counter O(1)
+# __eq__   : O(n) : O(n)
+# __len__  : O(1) : O(n) or O(1)
 # is_empty : see __bool__
-# peak     : O(1) : O(n), with counter O(1)
+# peak     : O(1) : O(n) or O(1)
 # pop      : O(1) : O(1)
-# push     : O(1) : O(1)
+# push     : O(1) : O(n) or O(1)
 
 
 class ListStack:
-    """Stack data structure list-based implementation."""
+    """Stack list-based implementation."""
 
     __slots__ = ["_stack"]
 
-    def __init__(self):
-        self._stack: List = []
+    def __init__(self, iterable: Sequence = None):
+        if iterable is None:
+            iterable = []
+        self._stack: List = list(iter(iterable))
 
     def __bool__(self):
         return bool(self.stack)
@@ -47,6 +51,9 @@ class ListStack:
 
     def __repr__(self):
         return repr(self.stack)
+
+    def __reversed__(self):
+        return ListStack(reversed(self.stack))
 
     def __str__(self):
         return str(self.stack)
@@ -66,7 +73,7 @@ class ListStack:
     @property
     def stack(self) -> List:
         """
-        Return the stack as list.
+        Return the stack as a list.
 
         Returns
         -------
@@ -78,7 +85,7 @@ class ListStack:
     @property
     def peak(self) -> Any:
         """
-        Return the last element of the stack.
+        Return the last element of stack.
 
         Returns
         -------
@@ -92,7 +99,7 @@ class ListStack:
 
     def pop(self):
         """
-        Delete the last element from the stack and return it.
+        Delete and return the first element from stack.
 
         Raises
         ------
@@ -107,6 +114,17 @@ class ListStack:
         """
         self._stack.pop()
 
-    def push(self, data):
-        """Push data into the stack."""
-        self._stack.append(data)
+    def push(self, element: Any):
+        """
+        Add element to the back of stack.
+
+        Parameters
+        ----------
+        element : Any
+
+        Returns
+        -------
+        None.
+
+        """
+        self._stack.append(element)

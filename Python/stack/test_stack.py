@@ -6,7 +6,7 @@
 __author__ = "Stanislav D. Kudriavtsev"
 
 
-from pytest import fixture
+from pytest import fixture, raises
 
 from stack import ListStack as Stack
 
@@ -43,6 +43,8 @@ def test_pop():
     stk.push(12)
     stk.pop()
     assert stk == []
+    with raises(IndexError):
+        stk.pop()
 
 
 def test_bool_and_is_empty():
@@ -82,3 +84,9 @@ def test_representations():
     lst = [elem]
     assert repr(stk) == repr(lst)
     assert str(stk) == str(lst)
+
+
+def test_reversed(data):
+    """reversed(stack)."""
+    stk = Stack(data)
+    assert reversed(stk) == list(reversed(data))
