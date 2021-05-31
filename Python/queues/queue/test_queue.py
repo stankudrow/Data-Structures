@@ -6,9 +6,9 @@
 __author__ = "Stanislav D. Kudriavtsev"
 
 
-from pytest import fixture, raises
+from pytest import fixture, mark, param, raises
 
-from qqueue import ListQueue as Queue
+from qqueue import Queue, QueueError
 
 
 # pylint: disable=arguments-out-of-order
@@ -43,7 +43,7 @@ def test_dequeue():
     queue.enqueue(12)
     queue.dequeue()
     assert queue == []
-    with raises(IndexError):
+    with raises(QueueError):
         queue.dequeue()
 
 
@@ -51,9 +51,9 @@ def test_bool_and_is_empty():
     """bool(queue) and queue.is_empty."""
     queue = Queue()
     queue.enqueue(12)
-    assert bool(queue) and not queue.is_empty
+    assert bool(queue) and not queue.empty
     queue.dequeue()
-    assert not bool(queue) and queue.is_empty
+    assert not bool(queue) and queue.empty
 
 
 def test_len():
@@ -86,7 +86,35 @@ def test_representations():
     assert str(queue) == str(lst)
 
 
-def test_reversed(data):
-    """reversed(queue)."""
-    queue = Queue(data)
-    assert reversed(queue) == list(reversed(data))
+@mark.parametrize(
+    "data, maxlen", [(data, None), param(data, 0, marks=mark.xfail)], indirect=["data"]
+)
+def test_from_iterable(data, maxlen):
+    """Queue.from_iterable(...)."""
+    queue = Queue(maxlen)
+    for item in data:
+        queue.enqueue(item)
+    assert queue == Queue.from_iterable(data, maxlen)
+
+
+def test_maxlen(data):
+    """Queue(..., maxlen=...))."""
+    maxlen = 10
+    queue = Queue.from_iterable(data, maxlen=maxlen)
+    while len(queue) < maxlen:
+        queue.enqueue(-1)
+    with raises(QueueError):
+        queue.enqueue(0)
+    with raises(QueueError):
+        Queue.from_iterable(data, maxlen=2)
+    with raises(TypeError):
+        Queue.from_iterable(data, maxlen=2.5)
+    with raises(ValueError):
+        Queue.from_iterable(data, maxlen=-5)
+
+
+def test_reverse(data):
+    """queue.reverse() (in-place)."""
+    queue = Queue.from_iterable(data)
+    queue.reverse()
+    assert Queue.from_iterable(reversed(data)) == queue

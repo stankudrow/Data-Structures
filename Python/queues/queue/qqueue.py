@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Stack data structure (DS) module.
+Queue data structure (DS) module.
 
-Python list DS can be used as a stack.
+Python provides the following tools:
+
+    * list DS can be used as a queue;
+
+    * queue module.
 
 See Also
 --------
-https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks
+https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-queues
+https://docs.python.org/3/library/queue.html
 """
 
 
@@ -15,65 +20,61 @@ __author__ = "Stanislav D. Kudriavtsev"
 
 
 from functools import total_ordering
-from typing import Any, List, Optional, Sequence
+from typing import Any, List, Sequence, Optional
 
 
 # Complexity: worst case
 
 # Operation :
 
-# __bool__  : O(1)
-# __eq__    : O(n)
-# __len__   : O(n) or O(1)
-# __lt__    : O(n)
-# empty     : __bool__
-# reverse   : O(n)
-# peak      : O(n) or O(1)
-# pop       : O(n) or O(1)
-# push      : O(n) or O(1)
-
-
-# A simpler "redefinition" is `class Stack(list)`.
-# Python list can be used as a stack, but the stack is not the list.
-# Here a stack is created "from zero".
+# __bool__      : O(1)
+# __eq__        : O(n)
+# __len__       : O(n) or O(1)
+# __lt__        : O(n)
+# dequeue       : O(n) or O(1)
+# empty         : __bool__
+# enqueue       : O(n) or O(1)
+# first         : O(1)
+# from_iterable : O(n)
+# reverse       : O(n)
 
 
 @total_ordering
-class Stack:
-    """Stack list-based implementation."""
+class Queue:
+    """Queue list-based implementation."""
 
-    __slots__ = ("_stack", "_maxlen")
+    __slots__ = ("_queue", "_maxlen")
 
     @classmethod
     def from_iterable(cls, iterable: Sequence = None, maxlen: Optional[int] = None):
         """
-        Create stack from a sequence with possibly defined maximum size.
+        Create priority queue from a sequence with possibly defined maximum size.
 
         Parameters
         ----------
-        cls : Stack.
+        cls : Queue.
         iterable : Sequence, optional
-            to create stack. The default is None.
+            to create queue. The default is None.
         maxlen : int
-            the maximum size of a stack.
+            the maximum size of a queue.
 
         Raises
         ------
-        StackError
-            stack overflow if maxlen is defined and exceeded.
+        QueueError
+            queue overflow if maxlen is defined and exceeded.
 
         Returns
         -------
-        stack : Stack.
+        queue : Queue.
 
         """
         if maxlen is not None:
             cls.check_maxlen(maxlen)
-        stack = cls(maxlen=maxlen)
+        queue = cls(maxlen=maxlen)
         if iterable is not None:
             for element in iterable:
-                stack.push(element)
-        return stack
+                queue.enqueue(element)
+        return queue
 
     @staticmethod
     def check_maxlen(maxlen: int):
@@ -107,37 +108,52 @@ class Stack:
         if maxlen is not None:
             self.check_maxlen(maxlen)
         self._maxlen: int = maxlen
-        self._stack: List = []
+        self._queue: List = []
 
     def __bool__(self):
-        return bool(self.stack)
+        return bool(self.queue)
 
     def __eq__(self, other):
-        return self.stack == other
+        return self.queue == other
 
     def __len__(self):
-        return len(self.stack)
+        return len(self.queue)
 
     def __lt__(self, other):
-        return self.stack < other
+        return self.queue < other
 
     def __repr__(self):
-        return repr(self.stack)
+        return repr(self.queue)
 
     def __str__(self):
-        return str(self.stack)
+        return str(self.queue)
 
     @property
     def empty(self) -> bool:
         """
-        Check if stack is empty.
+        Check if queue is empty.
 
         Returns
         -------
-        bool
+        bool.
 
         """
         return not bool(self)
+
+    @property
+    def first(self) -> Any:
+        """
+        Return the first element from queue without removing it.
+
+        Returns
+        -------
+        Any:
+            the first element or None if queue is empty.
+
+        """
+        if self.queue:  # __bool__
+            return self.queue[0]
+        return None
 
     @property
     def maxlen(self) -> int:
@@ -152,55 +168,40 @@ class Stack:
         return self._maxlen
 
     @property
-    def peak(self) -> Any:
+    def queue(self) -> List:
         """
-        Return the last element of stack.
-
-        Returns
-        -------
-        Any:
-            the last element or None if stack is empty.
-
-        """
-        if self.stack:  # __bool__
-            return self.stack[-1]  # len(self) - 1
-        return None
-
-    @property
-    def stack(self) -> List:
-        """
-        Return stack as a list.
+        Return the queue as a list.
 
         Returns
         -------
         List.
 
         """
-        return self._stack
+        return self._queue
 
-    def pop(self):
+    def dequeue(self):
         """
-        Delete and return the first element from stack.
+        Delete and return the first element from queue.
 
         Raises
         ------
-        StackError
-            if self.pop() from an empty stack.
+        QueueError
+            if self.dequeue() from an empty queue.
 
         Returns
         -------
         Any
-            the last element from a non-empty stack.
+            the first element from a non-empty queue.
 
         """
         try:
-            return self._stack.pop()
+            return self._queue.pop(0)
         except IndexError as inderr:
-            raise StackError("pop from empty stack") from inderr
+            raise QueueError("dequeue from empty queue") from inderr
 
-    def push(self, element: Any):
+    def enqueue(self, element: Any):
         """
-        Add element to the back of stack.
+        Add element to the back of queue.
 
         Parameters
         ----------
@@ -208,8 +209,8 @@ class Stack:
 
         Raises
         ------
-        StackError
-            stack overflow if maxlen is defined and exceeded.
+        QueueError
+            queue overflow if maxlen is defined and exceeded.
 
         Returns
         -------
@@ -217,8 +218,8 @@ class Stack:
 
         """
         if self.maxlen and len(self) >= self.maxlen:
-            raise StackError("stack overflow")
-        self._stack.append(element)
+            raise QueueError("queue overflow")
+        self._queue.append(element)
 
     def reverse(self):
         """
@@ -229,8 +230,8 @@ class Stack:
         None.
 
         """
-        self._stack = list(reversed(self.stack))
+        self._queue = list(reversed(self.queue))
 
 
-class StackError(Exception):
-    """Stack Exception class."""
+class QueueError(Exception):
+    """Queue Exception class."""
