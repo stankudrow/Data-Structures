@@ -47,13 +47,20 @@ def test_dequeue():
         queue.dequeue()
 
 
-def test_bool_and_is_empty():
-    """bool(queue) and queue.is_empty."""
+def test_bool():
+    """bool(queue)."""
     queue = Queue()
+    assert not bool(queue)
     queue.enqueue(12)
-    assert bool(queue) and not queue.empty
-    queue.dequeue()
-    assert not bool(queue) and queue.empty
+    assert bool(queue)
+
+
+def test_is_empty():
+    """test if queue is empty."""
+    queue = Queue()
+    assert queue.empty()
+    queue.enqueue(12)
+    assert not queue.empty()
 
 
 def test_len():
@@ -69,11 +76,11 @@ def test_len():
 def test_first():
     """queue.first."""
     queue = Queue()
-    assert queue.first is None
+    assert queue.first() is None
     queue.enqueue(1)
-    assert queue.first == 1
+    assert queue.first() == 1
     queue.enqueue(2)
-    assert queue.first == 1
+    assert queue.first() == 1
 
 
 def test_representations():
@@ -87,7 +94,11 @@ def test_representations():
 
 
 @mark.parametrize(
-    "data, maxlen", [(data, None), param(data, 0, marks=mark.xfail)], indirect=["data"]
+    "data, maxlen", [(data, None),
+                     (data, 0),
+                     (data, 10),
+                     param(4, 2, marks=mark.xfail)],
+    indirect=["data"]
 )
 def test_from_iterable(data, maxlen):
     """Queue.from_iterable(...)."""
@@ -113,8 +124,9 @@ def test_maxlen(data):
         Queue.from_iterable(data, maxlen=-5)
 
 
-def test_reverse(data):
-    """queue.reverse() (in-place)."""
-    queue = Queue.from_iterable(data)
-    queue.reverse()
-    assert Queue.from_iterable(reversed(data)) == queue
+def test_less_than_operation(data):
+    """self < other"""
+    queue1 = Queue()
+    queue2 = Queue.from_iterable(data)
+    assert queue1 < queue2
+    assert queue2 >= queue1

@@ -20,7 +20,7 @@ __author__ = "Stanislav D. Kudriavtsev"
 
 
 from functools import total_ordering
-from typing import Any, List, Sequence, Optional
+from typing import Any, Iterable, List, Optional
 
 
 # Complexity: worst case
@@ -46,68 +46,37 @@ class Queue:
     __slots__ = ("_queue", "_maxlen")
 
     @classmethod
-    def from_iterable(cls, iterable: Sequence = None, maxlen: Optional[int] = None):
+    def from_iterable(cls,
+                      iterable: Optional[Iterable] = None,
+                      maxlen: Optional[int] = None) -> 'Queue':
         """
-        Create priority queue from a sequence with possibly defined maximum size.
+        Create queue from an iterable object.
 
         Parameters
         ----------
-        cls : Queue.
-        iterable : Sequence, optional
-            to create queue. The default is None.
-        maxlen : int
-            the maximum size of a queue.
-
-        Raises
-        ------
-        QueueError
-            queue overflow if maxlen is defined and exceeded.
+        cls : Queue
+        iterable : Optional[Iterable], optional
+        maxlen : Optional[int], optional
 
         Returns
         -------
-        queue : Queue.
+        Queue
 
         """
-        if maxlen is not None:
-            cls.check_maxlen(maxlen)
         queue = cls(maxlen=maxlen)
         if iterable is not None:
             for element in iterable:
                 queue.enqueue(element)
         return queue
 
-    @staticmethod
-    def check_maxlen(maxlen: int):
-        """
-        Check if maxlen value is valid.
-
-        Parameters
-        ----------
-        maxlen : int
-            the maximum size of a priority queue.
-
-        Raises
-        ------
-        TypeError
-            if maxlen is not of integer type.
-        ValueError
-            if maxlen is a negative integer.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not isinstance(maxlen, int):
-            raise TypeError("maxlen is not integer")
-        if maxlen < 0:
-            raise ValueError("maxlen is negative")
-
     def __init__(self, maxlen: Optional[int] = None):
         # import pdb; pdb.set_trace()
-        if maxlen is not None:
-            self.check_maxlen(maxlen)
-        self._maxlen: int = maxlen
+        if maxlen:
+            if not isinstance(maxlen, int):
+                raise TypeError("maxlen is not integer")
+            if maxlen < 0:
+                raise ValueError("maxlen is negative")
+        self._maxlen: Optional[int] = maxlen
         self._queue: List = []
 
     def __bool__(self):
@@ -129,40 +98,13 @@ class Queue:
         return str(self.queue)
 
     @property
-    def empty(self) -> bool:
-        """
-        Check if queue is empty.
-
-        Returns
-        -------
-        bool.
-
-        """
-        return not bool(self)
-
-    @property
-    def first(self) -> Any:
-        """
-        Return the first element from queue without removing it.
-
-        Returns
-        -------
-        Any:
-            the first element or None if queue is empty.
-
-        """
-        if self.queue:  # __bool__
-            return self.queue[0]
-        return None
-
-    @property
-    def maxlen(self) -> int:
+    def maxlen(self) -> Optional[int]:
         """
         Return the maximum length of stack.
 
         Returns
         -------
-        int.
+        int
 
         """
         return self._maxlen
@@ -174,7 +116,7 @@ class Queue:
 
         Returns
         -------
-        List.
+        List
 
         """
         return self._queue
@@ -197,7 +139,18 @@ class Queue:
         try:
             return self._queue.pop(0)
         except IndexError as inderr:
-            raise QueueError("dequeue from empty queue") from inderr
+            raise QueueError("dequeue from an empty queue") from inderr
+
+    def empty(self) -> bool:
+        """
+        Check if queue is empty.
+
+        Returns
+        -------
+        bool
+
+        """
+        return not bool(self)
 
     def enqueue(self, element: Any):
         """
@@ -212,25 +165,24 @@ class Queue:
         QueueError
             queue overflow if maxlen is defined and exceeded.
 
-        Returns
-        -------
-        None.
-
         """
         if self.maxlen and len(self) >= self.maxlen:
             raise QueueError("queue overflow")
         self._queue.append(element)
 
-    def reverse(self):
+    def first(self) -> Any:
         """
-        In-place reverse.
+        Return the first element from queue without removing it.
 
         Returns
         -------
-        None.
+        Any:
+            the first element or None if the queue is empty.
 
         """
-        self._queue = list(reversed(self.queue))
+        if self.queue:
+            return self.queue[0]
+        return None
 
 
 class QueueError(Exception):
