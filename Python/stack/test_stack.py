@@ -47,13 +47,20 @@ def test_pop():
         stk.pop()
 
 
-def test_bool_and_is_empty():
-    """bool(stack) and stack.is_empty."""
+def test_bool():
+    """bool(stack)."""
     stk = Stack()
+    assert not bool(stk)
     stk.push(12)
-    assert bool(stk) and not stk.empty
-    stk.pop()
-    assert not bool(stk) and stk.empty
+    assert bool(stk)
+
+
+def test_is_empty():
+    """test stack is empty."""
+    stk = Stack()
+    assert stk.empty()
+    stk.push(12)
+    assert not stk.empty()
 
 
 def test_len():
@@ -67,13 +74,13 @@ def test_len():
 
 
 def test_peak():
-    """stack.peak."""
+    """stack.peak()."""
     stk = Stack()
-    assert stk.peak is None
+    assert stk.peak() is None
     stk.push(1)
-    assert stk.peak == 1
+    assert stk.peak() == 1
     stk.push(2)
-    assert stk.peak == 2
+    assert stk.peak() == 2
 
 
 def test_representations():
@@ -87,7 +94,11 @@ def test_representations():
 
 
 @mark.parametrize(
-    "data, maxlen", [(data, None), param(data, 0, marks=mark.xfail)], indirect=["data"]
+    "data, maxlen", [(data, None),
+                     (data, 0),
+                     (data, 10),
+                     param(4, 2, marks=mark.xfail)],
+    indirect=["data"]
 )
 def test_from_iterable(data, maxlen):
     """Stack.from_iterable(...)."""
@@ -113,8 +124,9 @@ def test_maxlen(data):
         Stack.from_iterable(data, maxlen=-5)
 
 
-def test_reverse(data):
-    """stack.reverse() (in-place)."""
-    stk = Stack.from_iterable(data)
-    stk.reverse()
-    assert Stack.from_iterable(reversed(data)) == stk
+def test_less_than_operation(data):
+    """self < other"""
+    s1 = Stack()
+    s2 = Stack.from_iterable(data)
+    assert s1 < s2
+    assert not (s2 < s1)

@@ -15,7 +15,7 @@ __author__ = "Stanislav D. Kudriavtsev"
 
 
 from functools import total_ordering
-from typing import Any, List, Optional, Sequence
+from typing import Any, Iterable, List, Optional
 
 
 # Complexity: worst case
@@ -45,68 +45,37 @@ class Stack:
     __slots__ = ("_stack", "_maxlen")
 
     @classmethod
-    def from_iterable(cls, iterable: Sequence = None, maxlen: Optional[int] = None):
+    def from_iterable(cls,
+                      iterable: Optional[Iterable] = None,
+                      maxlen: Optional[int] = None) -> 'Stack':
         """
-        Create stack from a sequence with possibly defined maximum size.
+        Create stack from an iterable object.
 
         Parameters
         ----------
-        cls : Stack.
-        iterable : Sequence, optional
-            to create stack. The default is None.
-        maxlen : int
-            the maximum size of a stack.
-
-        Raises
-        ------
-        StackError
-            stack overflow if maxlen is defined and exceeded.
+        cls : Stack
+        iterable : Optional[Iterable], optional
+        maxlen : Optional[int], optional
 
         Returns
         -------
-        stack : Stack.
+        Stack
 
         """
-        if maxlen is not None:
-            cls.check_maxlen(maxlen)
         stack = cls(maxlen=maxlen)
         if iterable is not None:
             for element in iterable:
                 stack.push(element)
         return stack
 
-    @staticmethod
-    def check_maxlen(maxlen: int):
-        """
-        Check if maxlen value is valid.
-
-        Parameters
-        ----------
-        maxlen : int
-            the maximum size of a priority queue.
-
-        Raises
-        ------
-        TypeError
-            if maxlen is not of integer type.
-        ValueError
-            if maxlen is a negative integer.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not isinstance(maxlen, int):
-            raise TypeError("maxlen is not integer")
-        if maxlen < 0:
-            raise ValueError("maxlen is negative")
-
     def __init__(self, maxlen: Optional[int] = None):
         # import pdb; pdb.set_trace()
-        if maxlen is not None:
-            self.check_maxlen(maxlen)
-        self._maxlen: int = maxlen
+        if maxlen:
+            if not isinstance(maxlen, int):
+                raise TypeError("maxlen is not integer")
+            if maxlen < 0:
+                raise ValueError("maxlen is negative")
+        self._maxlen: Optional[int] = maxlen
         self._stack: List = []
 
     def __bool__(self):
@@ -128,6 +97,29 @@ class Stack:
         return str(self.stack)
 
     @property
+    def maxlen(self) -> Optional[int]:
+        """
+        Return the maximum length of stack.
+
+        Returns
+        -------
+        Optional[int]
+
+        """
+        return self._maxlen
+
+    @property
+    def stack(self) -> List:
+        """
+        Return stack as a list.
+
+        Returns
+        -------
+        List
+
+        """
+        return self._stack
+
     def empty(self) -> bool:
         """
         Check if stack is empty.
@@ -139,19 +131,6 @@ class Stack:
         """
         return not bool(self)
 
-    @property
-    def maxlen(self) -> int:
-        """
-        Return the maximum length of stack.
-
-        Returns
-        -------
-        int.
-
-        """
-        return self._maxlen
-
-    @property
     def peak(self) -> Any:
         """
         Return the last element of stack.
@@ -162,21 +141,9 @@ class Stack:
             the last element or None if stack is empty.
 
         """
-        if self.stack:  # __bool__
-            return self.stack[-1]  # len(self) - 1
+        if self.stack:
+            return self.stack[-1]
         return None
-
-    @property
-    def stack(self) -> List:
-        """
-        Return stack as a list.
-
-        Returns
-        -------
-        List.
-
-        """
-        return self._stack
 
     def pop(self):
         """
@@ -211,25 +178,10 @@ class Stack:
         StackError
             stack overflow if maxlen is defined and exceeded.
 
-        Returns
-        -------
-        None.
-
         """
         if self.maxlen and len(self) >= self.maxlen:
             raise StackError("stack overflow")
         self._stack.append(element)
-
-    def reverse(self):
-        """
-        In-place reverse.
-
-        Returns
-        -------
-        None.
-
-        """
-        self._stack = list(reversed(self.stack))
 
 
 class StackError(Exception):
