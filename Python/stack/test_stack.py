@@ -56,7 +56,7 @@ def test_bool():
 
 
 def test_is_empty():
-    """test stack is empty."""
+    """test if stack is empty."""
     stk = Stack()
     assert stk.empty()
     stk.push(12)
@@ -126,7 +126,7 @@ def test_maxlen(data):
 
 def test_less_than_operation(data):
     """self < other"""
-    s1 = Stack()
-    s2 = Stack.from_iterable(data)
-    assert s1 < s2
-    assert not (s2 < s1)
+    stk1 = Stack()
+    stk2 = Stack.from_iterable(data)
+    assert stk1 < stk2
+    assert stk2 >= stk1

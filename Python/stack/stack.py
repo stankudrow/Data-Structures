@@ -160,10 +160,9 @@ class Stack:
             the last element from a non-empty stack.
 
         """
-        try:
-            return self._stack.pop()
-        except IndexError as inderr:
-            raise StackError("pop from empty stack") from inderr
+        if self.empty():
+            raise StackError("pop from an empty stack")
+        return self._stack.pop()
 
     def push(self, element: Any):
         """

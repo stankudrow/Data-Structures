@@ -1,7 +1,7 @@
 {
     "meta": {
         "version": "5.5",
-        "timestamp": "2021-08-04T17:08:26.978136",
+        "timestamp": "2021-08-04T17:43:22.593515",
         "branch_coverage": true,
         "show_contexts": false
     },
@@ -59,23 +59,22 @@
                 163,
                 164,
                 165,
-                166,
-                168,
+                167,
+                181,
                 182,
                 183,
-                184,
-                187,
-                188
+                186,
+                187
             ],
             "summary": {
-                "covered_lines": 56,
-                "num_statements": 56,
-                "percent_covered": 98.61111111111111,
+                "covered_lines": 55,
+                "num_statements": 55,
+                "percent_covered": 98.63013698630137,
                 "missing_lines": 0,
                 "excluded_lines": 0,
-                "num_branches": 16,
+                "num_branches": 18,
                 "num_partial_branches": 1,
-                "covered_branches": 15,
+                "covered_branches": 17,
                 "missing_branches": 1
             },
             "missing_lines": [],
@@ -179,14 +178,14 @@
         }
     },
     "totals": {
-        "covered_lines": 135,
-        "num_statements": 135,
-        "percent_covered": 99.36305732484077,
+        "covered_lines": 134,
+        "num_statements": 134,
+        "percent_covered": 99.36708860759494,
         "missing_lines": 0,
         "excluded_lines": 0,
-        "num_branches": 22,
+        "num_branches": 24,
         "num_partial_branches": 1,
-        "covered_branches": 21,
+        "covered_branches": 23,
         "missing_branches": 1
     }
 }
