@@ -54,7 +54,6 @@ def test_equality(data):
     assert stack != data.append(-1)
 
 
-# enStack was implicitly tested in the previous tests
 def test_push(data):
     """self.push()."""
     stack = Stack(len(data))
