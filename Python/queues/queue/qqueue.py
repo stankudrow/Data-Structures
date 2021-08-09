@@ -20,7 +20,7 @@ __author__ = "Stanislav D. Kudriavtsev"
 
 
 from functools import total_ordering
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, Iterator, List, Optional, Union
 
 
 # Complexity: worst case
@@ -29,14 +29,18 @@ from typing import Any, Iterable, List, Optional
 
 # __bool__      : O(1)
 # __eq__        : O(n)
+# __getitem__   : O(n)
 # __len__       : O(n) or O(1)
 # __lt__        : O(n)
 # dequeue       : O(n) or O(1)
 # empty         : __bool__
 # enqueue       : O(n) or O(1)
 # first         : O(1)
-# from_iterable : O(n)
-# reverse       : O(n)
+# from_sequence : O(n)
+
+
+# __iter__ and __next__ make the Queue class iterable + __sorted__ is enabled.
+# __getitem__ and __len__ make the Queue class subscriptable
 
 
 @total_ordering
@@ -46,9 +50,9 @@ class Queue:
     __slots__ = ("_queue", "_maxlen")
 
     @classmethod
-    def from_iterable(cls,
-                      iterable: Optional[Iterable] = None,
-                      maxlen: Optional[int] = None) -> 'Queue':
+    def from_iterable(
+        cls, seq: Optional[Iterable] = None, maxlen: Optional[int] = None
+    ) -> "Queue":
         """
         Create queue from an iterable object.
 
@@ -64,47 +68,158 @@ class Queue:
 
         """
         queue = cls(maxlen=maxlen)
-        if iterable is not None:
-            for element in iterable:
-                queue.enqueue(element)
+        if seq:
+            if maxlen is not None:
+                for elem, _ in zip(seq, range(maxlen)):
+                    queue.enqueue(elem)
+            else:
+                for elem in seq:
+                    queue.enqueue(elem)
         return queue
 
     def __init__(self, maxlen: Optional[int] = None):
-        # import pdb; pdb.set_trace()
+        self._queue: List = []
         if maxlen:
             if not isinstance(maxlen, int):
                 raise TypeError("maxlen is not integer")
             if maxlen < 0:
                 raise ValueError("maxlen is negative")
         self._maxlen: Optional[int] = maxlen
-        self._queue: List = []
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
+        """
+        Return True if the queue is non-empty.
+
+        Returns
+        -------
+        bool
+
+        """
         return bool(self.queue)
 
     def __eq__(self, other):
+        """
+        Return True if the queue is equal to the other object.
+
+        Parameters
+        ----------
+        other : Sequence
+
+        Returns
+        -------
+        bool
+
+        """
         return self.queue == other
 
-    def __len__(self):
+    def __getitem__(self, index: Union[int, slice]) -> Any:
+        """
+        Return the value(s) at the index.
+
+        Parameters
+        ----------
+        index : Union[int, slice]
+            either an int value or a slice object.
+
+        Raises
+        ------
+        IndexError
+            if the index is out of range.
+
+        Returns
+        -------
+        Any
+            the element of the queue or the slice as a list.
+
+        """
+        try:
+            return self.queue[index]
+        except IndexError as inderr:
+            raise IndexError("queue index out of range") from inderr
+
+    def __iter__(self) -> Iterator:
+        """
+        Return the iterator of the queue.
+
+        Returns
+        -------
+        Iterator
+
+        """
+        return iter(self.queue)
+
+    def __len__(self) -> int:
+        """
+        Return the length/size of the queue.
+
+        Returns
+        -------
+        int
+
+        """
         return len(self.queue)
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
+        """
+        Return True if the queue is less than the other object.
+
+        Parameters
+        ----------
+        other : Sequence
+
+        Returns
+        -------
+        bool
+
+        """
         return self.queue < other
 
-    def __repr__(self):
+    def __next__(self):
+        """
+        Return the current element of the queue.
+
+        Raises
+        ------
+        StopIteration
+            when the queue iterator is exceeded.
+
+        Returns
+        -------
+        Any
+
+        """
+        return next(self.queue)
+
+    def __repr__(self) -> str:
+        """
+        Return the queue as a representation.
+
+        Returns
+        -------
+        str
+
+        """
         return repr(self.queue)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Return the queue as a string.
+
+        Returns
+        -------
+        str
+
+        """
         return str(self.queue)
 
     @property
     def maxlen(self) -> Optional[int]:
         """
-        Return the maximum length of stack.
+        Return the maximum length of the queue.
 
         Returns
         -------
-        int
+        Optional[int]
 
         """
         return self._maxlen
@@ -121,14 +236,14 @@ class Queue:
         """
         return self._queue
 
-    def dequeue(self):
+    def dequeue(self) -> Any:
         """
-        Delete and return the first element from queue.
+        Delete and return the first element from the queue.
 
         Raises
         ------
         QueueError
-            if self.dequeue() from an empty queue.
+            dequeuing from an empty queue.
 
         Returns
         -------
@@ -143,7 +258,7 @@ class Queue:
 
     def empty(self) -> bool:
         """
-        Check if queue is empty.
+        Return True if the queue is empty.
 
         Returns
         -------
@@ -154,7 +269,7 @@ class Queue:
 
     def enqueue(self, element: Any):
         """
-        Add element to the back of queue.
+        Add the element to the rear of the queue.
 
         Parameters
         ----------
@@ -163,10 +278,10 @@ class Queue:
         Raises
         ------
         QueueError
-            queue overflow if maxlen is defined and exceeded.
+            enqueuing if maxlen is defined and exceeded.
 
         """
-        if self.maxlen and len(self) >= self.maxlen:
+        if (self.maxlen is not None) and (len(self) >= self.maxlen):
             raise QueueError("queue overflow")
         self._queue.append(element)
 
@@ -180,9 +295,7 @@ class Queue:
             the first element or None if the queue is empty.
 
         """
-        if self.queue:
-            return self.queue[0]
-        return None
+        return self[0]
 
 
 class QueueError(Exception):
