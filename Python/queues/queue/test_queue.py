@@ -43,12 +43,12 @@ def test_init(maxlen):
      param(-1., marks=mark.xfail(reason="negative non-integer"))]
 )
 def test_from_iterable(data, maxlen):
-    """Queue.from_iterable(...)."""
+    """self.from_iterable(...)."""
     assert data[:maxlen] == Queue.from_iterable(data, maxlen)
 
 
 def test_equality(data):
-    """Test the equality operator."""
+    """Test equality."""
     queue = Queue.from_iterable(data)
     assert queue == data
     assert queue != data.append(-1)
@@ -56,15 +56,17 @@ def test_equality(data):
 
 # enqueue was implicitly tested in the previous tests
 def test_enqueue(data):
-    """queue.enqueue(item)."""
-    queue = Queue()
+    """self.enqueue(item)."""
+    queue = Queue(len(data))
     for item in data:
         queue.enqueue(item)
     assert queue == data
+    with raises(QueueError):
+        queue.enqueue(1)
 
 
 def test_dequeue(data):
-    """queue.dequeue()."""
+    """self.dequeue()."""
     queue = Queue.from_iterable(data)
     for _ in data:
         queue.dequeue()
@@ -74,7 +76,7 @@ def test_dequeue(data):
 
 
 def test_bool():
-    """bool(queue)."""
+    """bool(self)."""
     queue = Queue()
     assert not bool(queue)
     queue.enqueue(12)
@@ -82,25 +84,28 @@ def test_bool():
 
 
 def test_is_empty():
-    """Test if the queue is empty."""
-    assert not test_bool()
+    """Test emptiness."""
+    queue = Queue()
+    assert queue.empty()
+    queue.enqueue(12)
+    assert not queue.empty()
 
 
 @mark.parametrize("data", [[], [1], [1, 2]])
 def test_len(data):
-    """len(queue)."""
+    """len(self)."""
     assert len(Queue().from_iterable(data)) == len(data)
 
 
 @mark.parametrize("seq", [param([], marks=mark.xfail), [1], [1, 2]])
 def test_first(seq):
-    """queue.first()."""
+    """self.first()."""
     queue = Queue().from_iterable(seq)
     assert queue.first() == queue[0] == seq[0]
 
 
 def test_representations(data):
-    """repr(queue) and str(queue)."""
+    """repr(self) and str(self)."""
     queue = Queue().from_iterable(data)
     assert repr(queue) == repr(data)
     assert str(queue) == str(data)
@@ -115,6 +120,9 @@ def test_less_than_operation(data):
 
 
 def test_iterableness(data):
-    """Test the queue to be iterable."""
-    for quel, datel in zip(Queue.from_iterable(data), data):
-        assert quel == datel
+    """Test iterableness."""
+    iqueue = iter(Queue.from_iterable(data))
+    for item in data:
+        assert item == next(iqueue)
+    with raises(StopIteration):
+        next(iqueue)

@@ -51,7 +51,7 @@ class Queue:
 
     @classmethod
     def from_iterable(
-        cls, seq: Optional[Iterable] = None, maxlen: Optional[int] = None
+        cls, iterable: Optional[Iterable] = None, maxlen: Optional[int] = None
     ) -> "Queue":
         """
         Create queue from an iterable object.
@@ -68,12 +68,12 @@ class Queue:
 
         """
         queue = cls(maxlen=maxlen)
-        if seq:
+        if iterable:
             if maxlen is not None:
-                for elem, _ in zip(seq, range(maxlen)):
+                for elem, _ in zip(iterable, range(maxlen)):
                     queue.enqueue(elem)
             else:
-                for elem in seq:
+                for elem in iterable:
                     queue.enqueue(elem)
         return queue
 
@@ -103,7 +103,7 @@ class Queue:
 
         Parameters
         ----------
-        other : Sequence
+        other
 
         Returns
         -------
@@ -146,7 +146,8 @@ class Queue:
         Iterator
 
         """
-        return iter(self.queue)
+        for item in self.queue:
+            yield item
 
     def __len__(self) -> int:
         """
@@ -165,7 +166,7 @@ class Queue:
 
         Parameters
         ----------
-        other : Sequence
+        other
 
         Returns
         -------
@@ -173,22 +174,6 @@ class Queue:
 
         """
         return self.queue < other
-
-    def __next__(self):
-        """
-        Return the current element of the queue.
-
-        Raises
-        ------
-        StopIteration
-            when the queue iterator is exceeded.
-
-        Returns
-        -------
-        Any
-
-        """
-        return next(self.queue)
 
     def __repr__(self) -> str:
         """
@@ -238,7 +223,7 @@ class Queue:
 
     def dequeue(self) -> Any:
         """
-        Delete and return the first element from the queue.
+        Pop the first element from the queue.
 
         Raises
         ------
